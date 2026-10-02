@@ -2,13 +2,13 @@ package com.Practice.StudentManagement.Service;
 
 
 import com.Practice.StudentManagement.Dtos.*;
-import com.Practice.StudentManagement.Exceptions.CourseNotFoundException;
 import com.Practice.StudentManagement.Exceptions.DepartmentNotFoundException;
 import com.Practice.StudentManagement.Exceptions.StudentNotFoundException;
 import com.Practice.StudentManagement.Model.Address;
 import com.Practice.StudentManagement.Model.Course;
 import com.Practice.StudentManagement.Model.Department;
 import com.Practice.StudentManagement.Model.Student;
+import com.Practice.StudentManagement.Projections.StudentProjection;
 import com.Practice.StudentManagement.Repository.CourseRepository;
 import com.Practice.StudentManagement.Repository.DepartmentRepository;
 import com.Practice.StudentManagement.Repository.StudentRepository;
@@ -16,6 +16,8 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -144,5 +146,25 @@ public class StudentService {
         studentRepository.save(student);
 
         return mapToResponse(student);
+    }
+
+    public Page<StudentResponse> getAllStudents(Pageable pageable) {
+        Page<Student>studentsPage=studentRepository.findAll(pageable);
+        return studentsPage.map(this::mapToResponse);
+    }
+
+    public List<StudentProjection> getNecessaryDetails() {
+        return studentRepository.findBy();
+    }
+
+    public StudentResponse getStudentByEmail(String email) {
+        Student student=studentRepository.findByEmail(email);
+        return mapToResponse(student);
+
+    }
+
+    public List<StudentResponse> getStudentByCourse(String courseName) {
+        return studentRepository.findStudentByCourse(courseName)
+                .stream().map(this::mapToResponse).toList();
     }
 }
